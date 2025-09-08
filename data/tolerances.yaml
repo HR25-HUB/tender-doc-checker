@@ -1,0 +1,66 @@
+categories:
+  clothing:
+    active: true
+    currency: RUB
+    description: Одежда, обувь и аксессуары
+    max_price: 50000
+    min_price: 500
+    tolerance: 0.1
+  construction:
+    active: true
+    currency: RUB
+    description: Строительные материалы и инструменты
+    max_price: 1000000
+    min_price: 100
+    tolerance: 0.08
+  custom_tech:
+    active: false
+    currency: RUB
+    description: Пользовательская техника и оборудование
+    max_price: 500000
+    min_price: 5000
+    tolerance: 0.04
+  default:
+    active: true
+    currency: RUB
+    description: Категория по умолчанию для неопознанных товаров
+    max_price: 1000000
+    min_price: 1
+    tolerance: 0.07
+  electronics:
+    active: true
+    currency: RUB
+    description: Электроника и бытовая техника
+    max_price: 1000000
+    min_price: 1000
+    tolerance: 0.05
+  food:
+    active: true
+    currency: RUB
+    description: Продукты питания и напитки
+    max_price: 10000
+    min_price: 10
+    tolerance: 0.03
+  furniture:
+    active: true
+    currency: RUB
+    description: Мебель и предметы интерьера
+    max_price: 200000
+    min_price: 1000
+    tolerance: 0.09
+  medicine:
+    active: true
+    currency: RUB
+    description: Медицинские препараты и оборудование
+    max_price: 100000
+    min_price: 50
+    tolerance: 0.02
+  office:
+    active: true
+    currency: RUB
+    description: Офисные принадлежности и расходные материалы
+    max_price: 50000
+    min_price: 50
+    tolerance: 0.06
+default_currency: RUB
+default_tolerance: 0.07

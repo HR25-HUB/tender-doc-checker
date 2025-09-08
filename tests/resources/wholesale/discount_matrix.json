@@ -1,0 +1,21 @@
+{
+  "volume_discounts": {
+    "tier_1": {"min": 100000, "max": 500000, "discount": 3},
+    "tier_2": {"min": 500000, "max": 2000000, "discount": 7},
+    "tier_3": {"min": 2000000, "max": 5000000, "discount": 12},
+    "tier_4": {"min": 5000000, "max": 10000000, "discount": 18},
+    "tier_5": {"min": 10000000, "discount": 25}
+  },
+  "category_discounts": {
+    "processors": {"bulk_50": 5, "bulk_100": 8, "bulk_200": 12},
+    "motherboards": {"bulk_100": 8, "bulk_200": 12, "bulk_500": 15},
+    "memory": {"bulk_150": 10, "bulk_300": 15, "bulk_500": 18},
+    "storage": {"bulk_30": 7, "bulk_100": 12, "bulk_200": 15}
+  },
+  "seasonal_discounts": {
+    "new_year": {"period": "12.15-01.15", "discount": 8},
+    "spring": {"period": "03.01-04.30", "discount": 5},
+    "summer": {"period": "07.01-08.31", "discount": 3},
+    "black_friday": {"period": "11.20-11.30", "discount": 15}
+  }
+}

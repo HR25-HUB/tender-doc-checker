@@ -1,0 +1,51 @@
+{
+  "test_timestamp": "2025-09-08T09:25:24.280499",
+  "analytics_dashboard": {
+    "document_trends": {
+      "document_type": "all",
+      "trend_period": 7,
+      "total_documents": 0,
+      "trend_direction": "no_data",
+      "average_daily_volume": 0,
+      "approval_trend": "no_data",
+      "peak_day": null,
+      "volatility": 0
+    },
+    "system_usage_trends": {
+      "trend_period": 7,
+      "total_usage": 0,
+      "usage_trend": "no_data",
+      "supplier_growth": "no_data",
+      "diversity_trend": "no_data",
+      "peak_usage_day": null,
+      "growth_rate": 0
+    },
+    "generated_at": "2025-09-08T09:25:24.281222",
+    "period_days": 7,
+    "summary": "Недостаточно данных для анализа трендов"
+  },
+  "price_market_summary": {
+    "total_items": 0,
+    "upward_trends": 0,
+    "downward_trends": 0,
+    "stable_trends": 0,
+    "average_volatility": 0,
+    "market_health": "no_data",
+    "top_rising_items": [],
+    "top_falling_items": []
+  },
+  "test_summary": {
+    "analytics_functions_tested": [
+      "analyze_document_trends",
+      "analyze_supplier_performance_trends",
+      "analyze_system_usage_trends",
+      "get_trend_analysis_dashboard"
+    ],
+    "price_analytics_functions_tested": [
+      "analyze_seasonal_trends",
+      "analyze_price_correlation",
+      "forecast_price_trend",
+      "get_market_trend_summary"
+    ]
+  }
+}

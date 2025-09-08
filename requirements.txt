@@ -1,0 +1,8 @@
+openai
+PyMuPDF
+python-docx
+PyYAML
+streamlit
+reportlab
+requests
+python-dotenv
