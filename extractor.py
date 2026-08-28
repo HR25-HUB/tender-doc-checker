@@ -31,6 +31,7 @@ class DocumentExtractor:
             ValueError: Неподдерживаемый формат или поврежденный файл
             IOError: Ошибки чтения файла
         """
+        file_extension: str | None = None
         try:
             if not file:
                 raise ValueError("Файл не предоставлен")
@@ -83,11 +84,10 @@ class DocumentExtractor:
             else:
                 return self._extract_text_plain(content)
 
-        except ValueError as e:
-            self.logger.error(f"Ошибка извлечения текста из файла {filename}: {str(e)}")
-            raise
         except Exception as e:
             self.logger.error(f"Ошибка извлечения текста из файла {filename}: {str(e)}")
+            if file_extension == ".csv" and isinstance(e, ValueError):
+                raise
             return self._extract_text_fallback(file)
 
     def _detect_file_format(self, file) -> str:
@@ -212,7 +212,10 @@ class DocumentExtractor:
         self, content: bytes, filename: str | None = None
     ) -> str:
         """Безопасное извлечение текста из CSV."""
-        decoded_text = content.decode("utf-8-sig")
+        try:
+            decoded_text = content.decode("utf-8-sig")
+        except UnicodeDecodeError as e:
+            raise ValueError("CSV файл должен быть в кодировке UTF-8") from e
         if not decoded_text.strip():
             raise ValueError("CSV файл пуст")
 

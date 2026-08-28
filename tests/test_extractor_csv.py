@@ -55,6 +55,13 @@ def test_malformed_csv_raises_explicit_error() -> None:
         extract_text_from_file(file_obj)
 
 
+def test_invalid_utf8_csv_raises_explicit_error() -> None:
+    file_obj = _csv_file(b"\xff\xfe\xfa\xfd")
+
+    with pytest.raises(ValueError, match="кодировке UTF-8"):
+        extract_text_from_file(file_obj)
+
+
 def test_csv_extraction_with_read_only_wrapper() -> None:
     class ReadOnlyUpload:
         def __init__(self, name: str, content: bytes) -> None:
