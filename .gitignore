@@ -138,8 +138,11 @@ cython_debug/
 # PyCharm
 .idea/
 
-# VS Code
-.vscode/
+# VS Code: keep only shared workspace controls under version control
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
 
 # Project specific
 data/reports/*.pdf

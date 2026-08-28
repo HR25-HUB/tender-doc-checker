@@ -1,0 +1,46 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Python: Sync dev dependencies",
+      "type": "shell",
+      "command": "uv sync --extra dev",
+      "problemMatcher": []
+    },
+    {
+      "label": "Python: Ruff format check",
+      "type": "shell",
+      "command": "uv run ruff format --check .",
+      "problemMatcher": []
+    },
+    {
+      "label": "Python: Ruff lint",
+      "type": "shell",
+      "command": "uv run ruff check .",
+      "problemMatcher": []
+    },
+    {
+      "label": "Python: mypy",
+      "type": "shell",
+      "command": "uv run mypy .",
+      "problemMatcher": []
+    },
+    {
+      "label": "Python: pytest",
+      "type": "shell",
+      "command": "uv run pytest tests/ -v",
+      "problemMatcher": []
+    },
+    {
+      "label": "Python: Full check",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Python: Ruff format check",
+        "Python: Ruff lint",
+        "Python: mypy",
+        "Python: pytest"
+      ],
+      "problemMatcher": []
+    }
+  ]
+}
