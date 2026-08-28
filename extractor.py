@@ -1,5 +1,6 @@
+import csv
+import io
 from pathlib import Path
-from typing import Optional
 
 import docx
 import fitz  # PyMuPDF
@@ -11,11 +12,11 @@ class DocumentExtractor:
     """Улучшенный извлекатель текста из документов с обработкой ошибок и fallback-механизмами."""
 
     def __init__(self):
-        self.supported_formats = {".pdf", ".docx", ".txt", ".md", ".rtf"}
+        self.supported_formats = {".pdf", ".docx", ".txt", ".md", ".rtf", ".csv"}
         self.max_file_size = 50 * 1024 * 1024  # 50MB
         self.logger = logger
 
-    def extract_text_from_file(self, file, filename: Optional[str] = None) -> str:
+    def extract_text_from_file(self, file, filename: str | None = None) -> str:
         """
         Извлечение текста из файла с улучшенной обработкой ошибок.
 
@@ -35,8 +36,14 @@ class DocumentExtractor:
                 raise ValueError("Файл не предоставлен")
 
             # Определение формата файла
-            if filename:
-                file_extension = Path(filename).suffix.lower()
+            detected_filename = filename
+            if not detected_filename and hasattr(file, "name"):
+                file_name_attr = file.name
+                if isinstance(file_name_attr, str):
+                    detected_filename = file_name_attr
+
+            if detected_filename:
+                file_extension = Path(detected_filename).suffix.lower()
             else:
                 # Fallback: попытка определить по содержимому
                 file_extension = self._detect_file_format(file)
@@ -46,25 +53,39 @@ class DocumentExtractor:
                 return self._extract_text_fallback(file)
 
             # Проверка размера файла
-            file.seek(0, 2)  # Переход в конец
-            file_size = file.tell()
-            file.seek(0)  # Возврат в начало
+            content: bytes | None = None
+            try:
+                file.seek(0, 2)  # Переход в конец
+                file_size = file.tell()
+                file.seek(0)  # Возврат в начало
+            except (AttributeError, OSError, TypeError):
+                content = file.read()
+                file_size = len(content)
 
             if file_size > self.max_file_size:
                 self.logger.warning(f"Файл слишком большой: {file_size} байт")
                 return self._extract_text_large_file(file, file_extension)
 
             # Извлечение текста в зависимости от формата
-            content = file.read()
-            file.seek(0)  # Возврат в начало для повторного использования
+            if content is None:
+                content = file.read()
+                try:
+                    file.seek(0)  # Возврат в начало для повторного использования
+                except (AttributeError, OSError, TypeError):
+                    pass
 
             if file_extension == ".pdf":
-                return self._extract_from_pdf_safe(content, filename)
+                return self._extract_from_pdf_safe(content, detected_filename)
             elif file_extension == ".docx":
-                return self._extract_from_docx_safe(content, filename)
+                return self._extract_from_docx_safe(content, detected_filename)
+            elif file_extension == ".csv":
+                return self._extract_from_csv_safe(content, detected_filename)
             else:
                 return self._extract_text_plain(content)
 
+        except ValueError as e:
+            self.logger.error(f"Ошибка извлечения текста из файла {filename}: {str(e)}")
+            raise
         except Exception as e:
             self.logger.error(f"Ошибка извлечения текста из файла {filename}: {str(e)}")
             return self._extract_text_fallback(file)
@@ -87,7 +108,7 @@ class DocumentExtractor:
             return ".txt"
 
     def _extract_from_pdf_safe(
-        self, content: bytes, filename: Optional[str] = None
+        self, content: bytes, filename: str | None = None
     ) -> str:
         """Безопасное извлечение текста из PDF с обработкой ошибок."""
         try:
@@ -124,7 +145,7 @@ class DocumentExtractor:
             return self._extract_text_pdf_fallback(content)
 
     def _extract_from_docx_safe(
-        self, content: bytes, filename: Optional[str] = None
+        self, content: bytes, filename: str | None = None
     ) -> str:
         """Безопасное извлечение текста из DOCX с обработкой ошибок."""
         try:
@@ -187,6 +208,47 @@ class DocumentExtractor:
             self.logger.error(f"Ошибка декодирования текста: {str(e)}")
             return ""
 
+    def _extract_from_csv_safe(
+        self, content: bytes, filename: str | None = None
+    ) -> str:
+        """Безопасное извлечение текста из CSV."""
+        decoded_text = content.decode("utf-8-sig")
+        if not decoded_text.strip():
+            raise ValueError("CSV файл пуст")
+
+        lines = [line for line in decoded_text.splitlines() if line.strip()]
+        sample = "\n".join(lines[:5])
+
+        delimiter = ","
+        if ";" in sample and "," not in sample:
+            delimiter = ";"
+        elif "," in sample and ";" in sample:
+            try:
+                delimiter = csv.Sniffer().sniff(sample, delimiters=",;").delimiter
+            except csv.Error:
+                delimiter = ","
+
+        try:
+            reader = csv.reader(
+                io.StringIO(decoded_text),
+                delimiter=delimiter,
+                quotechar='"',
+                strict=True,
+            )
+            normalized_rows = []
+            for row in reader:
+                stripped_row = [cell.strip() for cell in row]
+                if any(cell for cell in stripped_row):
+                    normalized_rows.append(" | ".join(stripped_row))
+        except csv.Error as e:
+            raise ValueError(f"Некорректный CSV формат: {str(e)}") from e
+
+        if not normalized_rows:
+            error_target = filename or "CSV"
+            raise ValueError(f"{error_target} не содержит извлекаемых данных")
+
+        return "\n".join(normalized_rows)
+
     def _extract_text_large_file(self, file, file_extension: str) -> str:
         """Обработка больших файлов с ограничением по памяти."""
         self.logger.info("Обработка большого файла с chunking'ом")
@@ -198,6 +260,8 @@ class DocumentExtractor:
             if file_extension == ".pdf":
                 # Для PDF используем постраничную обработку
                 return self._extract_from_pdf_safe(file.read(), "large_file.pdf")
+            elif file_extension == ".csv":
+                return self._extract_from_csv_safe(file.read(), "large_file.csv")
             else:
                 # Для других форматов читаем по частям
                 while True:
