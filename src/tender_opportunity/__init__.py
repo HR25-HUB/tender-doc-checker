@@ -1,0 +1,1 @@
+"""Tender Opportunity bounded context."""
